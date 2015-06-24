@@ -1,0 +1,25 @@
+<ion-view hide-nav-bar="true" view-title="Login" class="login-pane" can-swipe-back="false">
+    <ion-content has-header="false" class="login padding">
+        <div class="list">
+            <img src="img/mod-logo.svg" class="logo">
+        </div>
+        <div class="list padding">
+            <label class="item item-input">
+                <span class="input-label">Email</span>
+                <input type="text" ng-model="user.email">
+            </label>
+            <label class="item item-input">
+                <span class="input-label">Password</span>
+                <input type="password" ng-model="user.pwdForLogin">
+            </label>
+            <button ng-click="signIn(user)" class="button button-block button-energized activated">
+                Sign In
+            </button>
+        </div>
+        <div class="list" style="text-align:center">
+            <button ng-click="modal.show()" class="button button-small button-outline icon-left ion-person-add button-energized">
+                Create New Account
+            </button>
+        </div>
+    </ion-content>
+</ion-view>

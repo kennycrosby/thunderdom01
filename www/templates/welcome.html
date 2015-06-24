@@ -1,0 +1,17 @@
+<ion-modal-view>
+    <ion-header-bar class="bar bar-header bar-energized">
+        <h1 class="title">Welcome</h1>
+    </ion-header-bar>
+    <ion-content class="padding welcome">
+        <h1>Welcome to mod</h1>
+        <h2>{{currUser.displayName}}</h2>
+        <img ng-src="img/{{currUser.image}}">
+
+        <h3>Times checked into this location: {{currUser.locationCount}}</h3>
+
+        <button class="button button-energized" ng-click="continue()">
+          Continue
+        </button>
+
+    </ion-content>
+</ion-modal-view>

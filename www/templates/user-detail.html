@@ -1,0 +1,34 @@
+<!--
+  This template loads for the 'tab.friend-detail' state (app.js)
+  'friend' is a $scope variable created in the FriendsCtrl controller (controllers.js)
+  The FriendsCtrl pulls data from the Friends service (service.js)
+  The Friends service returns an array of friend data
+-->
+<ion-view hide-nav-bar="false" view-title="{{user.displayName}}">
+  <ion-content class="padding has-header" has-header="true">
+    <div class="list card">
+      <div class="item item-avatar">
+        <img ng-src="img/{{user.image}}">
+        <h2><span class="subdued">Username:</span> {{user.displayName}}</h2>
+        <p><span class="subdued">Email:</span> {{user.email}}</p>
+      </div>
+      <div class="item item-body">
+
+        <h3>Zone: {{user.zone}}</h3>
+        
+        <!-- Show checked in at if the user has unlocked -->
+        <div ng-show="user.unlocked">
+          <p>Checked in: {{user.lastSeen | amCalendar}}</p>
+        </div>
+
+        <!-- Show checked out at if the user has left the perimiter -->
+        <div ng-hide="user.unlocked">
+          <p>Last Seen: {{user.lastSeen | amCalendar}}</p>
+        </div>
+
+        <p>{{user.displayName}} has been to mod {{user.locationCount}} times.</p>
+      </div>
+
+    </div>
+  </ion-content>
+</ion-view>

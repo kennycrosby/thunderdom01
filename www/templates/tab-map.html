@@ -1,0 +1,55 @@
+<ion-view hide-nav-bar="false" view-title="Mod Map">
+  <ion-content class="padding map" has-header="true">
+    
+    <h1>Mod SF</h1>
+    <div class="map-view">
+    	<div class="row one">
+			  <div class="col col-33 zone-4">
+			  	<div ng-repeat="zone in zones[4]">
+		        <a href="#/tab/dash/{{zone.id}}"><img ng-src="img/{{zone.image}}" ng-class="{{zone.unlocked}} ? 'here' : 'nothere'"></a>
+		      </div>
+			  </div>
+			  <div class="col col-20"></div>
+			  <div class="col zone-5">
+			  	<div ng-repeat="zone in zones[5]">
+		        <a href="#/tab/map/{{zone.id}}"><img ng-src="img/{{zone.image}}" ng-class="{{zone.unlocked}} ? 'here' : 'nothere'"></a>
+		      </div>
+			  </div>
+			</div>
+			<div class="row two">
+			  <div class="col col-33 zone-3">
+			  	<div ng-repeat="zone in zones[3]">
+		        <a href="#/tab/dash/{{zone.id}}"><img ng-src="img/{{zone.image}}" ng-class="{{zone.unlocked}} ? 'here' : 'nothere'"></a>
+		      </div>
+			  </div>
+			  <div class="col zone-1">
+			  	<div ng-repeat="zone in zones[1]">
+		        <a href="#/tab/dash/{{zone.id}}"><img ng-src="img/{{zone.image}}" ng-class="{{zone.unlocked}} ? 'here' : 'nothere'"></a>
+		      </div>
+			  </div>
+			</div>
+			<div class="row three">
+			  <div class="col col-33 zone-2">
+			  	<div ng-repeat="zone in zones[2]">
+		        <a href="#/tab/dash/{{zone.id}}"><img ng-src="img/{{zone.image}}" ng-class="{{zone.unlocked}} ? 'here' : 'nothere'"></a>
+		      </div>
+			  </div>
+			  <div class="col"></div>
+			</div>
+    </div>
+
+    <h3 class="debug" style="margin: 10px;"></h3>
+
+    <h3>Users Not at mod</h3>
+    <ion-list>
+      <ion-item class="item-avatar" ng-repeat="zone in zones[0]" type="item-text-wrap" href="#/tab/dash/{{zone.id}}">
+        <img ng-src="img/{{zone.image}}" ng-class="{{zone.unlocked}} ? 'here' : 'nothere'">
+        <h2>{{zone.displayName}}</h2>
+        <p>Left at: {{zone.lastSeen | date:'short' }}</p>
+    </ion-list>
+
+
+    
+
+  </ion-content>
+</ion-view>

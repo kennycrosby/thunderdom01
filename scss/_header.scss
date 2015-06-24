@@ -1,0 +1,13 @@
+ion-nav-bar {
+	ion-header-bar {
+		.bar.bar-dark .title,
+		.title {
+			color: $energized !important;
+			font-weight: 900 !important;
+		}
+	}
+}
+
+.lockscreen {
+	background: $dark;
+}

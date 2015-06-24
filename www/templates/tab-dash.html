@@ -1,0 +1,36 @@
+<ion-view view-title="Dashboard">
+  <ion-content class="dash">
+    <ion-list>
+      <ion-item class="item-remove-animate item-avatar item-icon-right" ng-repeat="user in users" type="item-text-wrap" href="#/tab/dash/{{user.id}}">
+        <!-- <img ng-src="img/{{user.image}}" ng-class="{ user.unlocked ? 'here' : 'nothere' }"> -->
+
+        <img ng-src="img/{{user.image}}" ng-class="{ 'here' : user.unlocked, 'nothere' : !user.unlocked }" >
+        <h2>{{user.displayName}}</h2>
+        <div ng-show="user.unlocked">
+          <p>Checked in:<br> {{user.lastSeen | amCalendar}}</p>
+        </div>
+        <div ng-hide="user.unlocked">
+          <p>Last seen:<br> {{user.lastSeen | amCalendar}}</p>
+        </div>
+        <i class="icon ion-chevron-right icon-accessory"></i>
+    </ion-list>
+    <ion-list ng-hide="users.length">
+        <ion-item class="textCenter">
+            <i class="icon ion-loading-c"></i> Loading Users
+        </ion-item>
+    </ion-list>
+
+    <!-- <button class="button button-energized" ng-click="monitor()">
+      Monitor
+    </button> -->
+
+<!--     <button class="button button-energized" ng-click="scheduleDelayedNotification()">
+      scheduleDelayedNotification
+    </button>
+
+    <button class="button button-energized" ng-click="scheduleEveryMinuteNotification()">
+      scheduleEveryMinuteNotification
+    </button> -->
+    
+  </ion-content>
+</ion-view>
