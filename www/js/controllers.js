@@ -62,6 +62,7 @@ angular.module('thunderdome.controllers', [])
                 // To Update AngularJS $scope either use $apply or $timeout
                 $scope.$apply(function () {
                     $rootScope.displayName = val;
+                    $rootScope.currUser = val;
                 });
             });
             $ionicLoading.hide();
@@ -75,15 +76,62 @@ angular.module('thunderdome.controllers', [])
     }
 })
 
-.controller('DashCtrl', function ($scope, $rootScope, Dash, Users, $cordovaLocalNotification, Zones) {
+.controller('DashCtrl', function ($scope, $rootScope, $ionicModal, $cordovaLocalNotification, Dash, Users, Zones) {
+
+  
+
+  $cordovaLocalNotification.cancelAll().then(function (result) {
+    // ...
+  });
 
   // Welcome to mod!!!!!!!
+  $rootScope.$on('$cordovaLocalNotification:click',
+  function (theevent, notification, state) {
 
-  // $ionicModal.fromTemplateUrl('templates/welcome.html', {
-  //   scope: $scope
-  // }).then(function (modal) {
-  //   $scope.modal = modal;
-  // });
+    if (notification.id === '11') {
+      $scope.modal.show();  
+    };
+
+    console.log(notification);
+    console.log('notification ID', notification.id);
+    console.log('notification time', notification.at);
+    console.log('state', state);
+  });
+
+  // $scope.scheduleDelayedNotification = function () {
+  //   var now = new Date().getTime();
+  //   var _30SecondsFromNow = new Date(now + 30 * 1000);
+
+  //   $cordovaLocalNotification.schedule({
+  //     id: 20,
+  //     title: 'Title here',
+  //     text: '30 sec here',
+  //     at: _30SecondsFromNow
+  //   }).then(function (result) {
+  //     // ...
+  //   });
+  // };
+
+  // $scope.scheduleEveryMinuteNotification = function () {
+  //   $cordovaLocalNotification.schedule({
+  //     id: 30,
+  //     title: 'Title here',
+  //     text: 'minute Text here',
+  //     every: 'minute'
+  //   }).then(function (result) {
+  //     // ...
+  //   });
+  // };
+
+  $scope.continue = function() {
+    $scope.modal.hide();
+  }
+
+  $ionicModal.fromTemplateUrl('templates/welcome.html', {
+    scope: $scope
+  }).then(function (modal) {
+    $scope.modal = modal;
+  });
 
   // With the new view caching in Ionic, Controllers are only called
   // when they are recreated or on app start, instead of every page change.
@@ -113,6 +161,8 @@ angular.module('thunderdome.controllers', [])
     //alert('You are ' + regionState.state + ' the region');
 
     if (regionState.state === 'inside') {
+
+      $scope.modal.show();
       
       // START SCANNING AND SET THE ZONE FOR THIS USER
       Zones.scan($rootScope.userRef);
@@ -130,9 +180,9 @@ angular.module('thunderdome.controllers', [])
         $scope.$apply();
       });
 
-
       var now = new Date().getTime();
       var _30SecondsFromNow = new Date(now + 30 * 1000);
+
       $cordovaLocalNotification.schedule({
         id: 11,
         title: 'Welcome to mod!',
@@ -147,11 +197,14 @@ angular.module('thunderdome.controllers', [])
       // stop scanning for interior zones
       Zones.stopScan();
 
+      // Update the user data in firebase
       $rootScope.userRef.child('unlocked').set(false);
       $rootScope.userRef.child('lastSeen').set(Date.now());
+      $rootScope.userRef.child('zone').set(0);
 
       var now = new Date().getTime();
       var _30SecondsFromNow = new Date(now + 30 * 1000);
+
       $cordovaLocalNotification.schedule({
         id: 22,
         title: 'You left mod!',

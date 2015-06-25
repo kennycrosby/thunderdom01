@@ -33,13 +33,16 @@ angular.module('thunderdome', ['ionic', 'thunderdome.controllers', 'thunderdome.
 
     document.addEventListener("deviceready", function() {
 
-      if(device.platform === "iOS") {
-        window.plugin.notification.local.promptForPermission();
-        //window.plugin.notification.local.registerPermission();
-      }
+      // if(device.platform === "iOS") {
+      //   window.plugin.notification.local.promptForPermission();
+      //   //window.plugin.notification.local.registerPermission();
+      // }
+
+      EstimoteBeacons.requestAlwaysAuthorization()
+      window.plugin.notification.local.promptForPermission()
 
       console.log('device ready 2');
-      $cordovaStatusbar.show();
+
 
       //setTimeout(function() {
         //if (window.StatusBar) {
@@ -55,6 +58,7 @@ angular.module('thunderdome', ['ionic', 'thunderdome.controllers', 'thunderdome.
     $rootScope.firebaseUrl = firebaseUrl;
     $rootScope.displayName = null;
     $rootScope.userRef = null;
+    $rootScope.currUser = null;
 
     Auth.$onAuth(function (authData) {
       if (authData) {

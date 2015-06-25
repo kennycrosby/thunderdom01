@@ -142,7 +142,6 @@ angular.module('thunderdome.services', ['firebase'])
     },
 
     stopScan : function() {
-      console.log('calling stopscan');
       estimote.beacons.stopRangingBeaconsInRegion(this.regionObj);
     }
   }
