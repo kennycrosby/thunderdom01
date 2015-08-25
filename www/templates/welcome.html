@@ -1,17 +1,21 @@
 <ion-modal-view>
-    <ion-header-bar class="bar bar-header bar-energized">
-        <h1 class="title">Welcome</h1>
-    </ion-header-bar>
-    <ion-content class="padding welcome">
-        <h1>Welcome to mod</h1>
-        <h2>{{currUser.displayName}}</h2>
-        <img ng-src="img/{{currUser.image}}">
+  <ion-header-bar class="bar bar-header bar-energized">
+    <h1 ng-show="currUser.unlocked" class="title">Welcome</h1>
+    <h1 ng-hide="currUser.unlocked" class="title">Later</h1>
+  </ion-header-bar>
+  <ion-content class="padding welcome">
+      
+    <h1 ng-show="currUser.unlocked">Welcome to mod</h1>
+    <h1 ng-hide="currUser.unlocked">Come Back Soon</h1>
 
-        <h3>Times checked into this location: {{currUser.locationCount}}</h3>
+    <h2>{{currUser.displayName}}</h2>
+    <img ng-src="img/{{currUser.image}}">
 
-        <button class="button button-energized" ng-click="continue()">
-          Continue
-        </button>
+    <h3>Times checked into this location: {{currUser.locationCount}}</h3>
 
-    </ion-content>
+    <button class="button button-energized" ng-click="continue()">
+      Continue
+    </button>
+
+  </ion-content>
 </ion-modal-view>

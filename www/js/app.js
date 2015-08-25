@@ -16,16 +16,14 @@ document.addEventListener("deviceready", onDeviceReady, false);
 // 'thunderdome.controllers' is found in controllers.js
 angular.module('thunderdome', ['ionic', 'thunderdome.controllers', 'thunderdome.services', 'firebase', 'angularMoment', 'ngCordova'])
 
-.run(function ($ionicPlatform, $rootScope, $location, Auth, $ionicLoading, $cordovaStatusbar) {
+.run(function ($ionicPlatform, $rootScope, $location, Auth, $ionicLoading, $cordovaStatusbar, $ionicModal) {
   $ionicPlatform.ready(function() {
-
-    console.log('ionic ready');
 
     // Hide the accessory bar by default (remove this to show the accessory bar above the keyboard
     // for form inputs)
     if (window.cordova && window.cordova.plugins.Keyboard) {
-        cordova.plugins.Keyboard.hideKeyboardAccessoryBar(true);
-        cordova.plugins.Keyboard.disableScroll(true);
+      cordova.plugins.Keyboard.hideKeyboardAccessoryBar(true);
+      cordova.plugins.Keyboard.disableScroll(true);
     }
     
     // To Resolve Bug
@@ -38,11 +36,10 @@ angular.module('thunderdome', ['ionic', 'thunderdome.controllers', 'thunderdome.
       //   //window.plugin.notification.local.registerPermission();
       // }
 
-      EstimoteBeacons.requestAlwaysAuthorization()
-      window.plugin.notification.local.promptForPermission()
+      EstimoteBeacons.requestAlwaysAuthorization();
+      window.plugin.notification.local.promptForPermission();
 
       console.log('device ready 2');
-
 
       //setTimeout(function() {
         //if (window.StatusBar) {
@@ -56,7 +53,6 @@ angular.module('thunderdome', ['ionic', 'thunderdome.controllers', 'thunderdome.
     }, false);
 
     $rootScope.firebaseUrl = firebaseUrl;
-    $rootScope.displayName = null;
     $rootScope.userRef = null;
     $rootScope.currUser = null;
 
@@ -78,6 +74,16 @@ angular.module('thunderdome', ['ionic', 'thunderdome.controllers', 'thunderdome.
       });
       Auth.$unauth();
     }
+
+    $rootScope.continue = function() {
+      $rootScope.modal.hide();
+    }
+
+    $ionicModal.fromTemplateUrl('templates/welcome.html', {
+      scope: $rootScope
+    }).then(function (modal) {
+      $rootScope.modal = modal;
+    });
 
     $rootScope.$on("$stateChangeError", function (event, toState, toParams, fromState, fromParams, error) {
       // We can catch the error thrown when the $requireAuth promise is rejected
@@ -148,6 +154,16 @@ angular.module('thunderdome', ['ionic', 'thunderdome.controllers', 'thunderdome.
       'tab-dash': {
         templateUrl: 'templates/user-detail.html',
         controller: 'UserDetailCtrl'
+      }
+    }
+  })
+
+  .state('tab.feed', {
+    url: '/feed',
+    views: {
+      'tab-feed': {
+        templateUrl: 'templates/tab-feed.html',
+        controller: 'FeedCtrl'
       }
     }
   })

@@ -61,7 +61,6 @@ angular.module('thunderdome.controllers', [])
                 var val = snapshot.val();
                 // To Update AngularJS $scope either use $apply or $timeout
                 $scope.$apply(function () {
-                    $rootScope.displayName = val;
                     $rootScope.currUser = val;
                 });
             });
@@ -78,8 +77,12 @@ angular.module('thunderdome.controllers', [])
 
 .controller('DashCtrl', function ($scope, $rootScope, $ionicModal, $cordovaLocalNotification, Dash, Users, Zones) {
 
-  
+  // Get and display all of the users on the dash
+  $scope.users = Users.all();
 
+  ///////////////////////////////////////////////////
+  // Notifications
+  // Cancel notifications
   $cordovaLocalNotification.cancelAll().then(function (result) {
     // ...
   });
@@ -88,9 +91,7 @@ angular.module('thunderdome.controllers', [])
   $rootScope.$on('$cordovaLocalNotification:click',
   function (theevent, notification, state) {
 
-    if (notification.id === '11') {
-      $scope.modal.show();  
-    };
+    $rootScope.modal.show();
 
     console.log(notification);
     console.log('notification ID', notification.id);
@@ -123,105 +124,155 @@ angular.module('thunderdome.controllers', [])
   //   });
   // };
 
-  $scope.continue = function() {
-    $scope.modal.hide();
-  }
-
-  $ionicModal.fromTemplateUrl('templates/welcome.html', {
-    scope: $scope
-  }).then(function (modal) {
-    $scope.modal = modal;
-  });
-
   // With the new view caching in Ionic, Controllers are only called
   // when they are recreated or on app start, instead of every page change.
   // To listen for when this page is active (for example, to refresh data),
   // listen for the $ionicView.enter event:
-  //
   // $scope.$on('$ionicView.enter', function(e) {
   //   console.log('entered this view');
   // });
 
-  // Monitor for beacons
-  // $scope.monitor = function() {
-  //   Dash.monitor();
-  // }
+  Dash.monitor(function($scope){
+    // inside callback
+    console.log('Monitor callback inside inside');
 
-  // Dash.monitor();
+    // START SCANNING AND SET THE ZONE FOR THIS USER
+    Zones.scan($rootScope.userRef);
 
-  estimote.beacons.startMonitoringForRegion(
-  {
-    'identifier': 'MyRegion',
-    'uuid': 'B9407F30-F5F8-466E-AFF9-25556B57FE6D'
-  },
-  function(regionState){
+    console.log('$rootScope.currUser', $rootScope.currUser);
 
-    // console.log('regionState', regionState);
-    // console.log('You are ' + regionState.state + ' the region');
-    //alert('You are ' + regionState.state + ' the region');
-
-    if (regionState.state === 'inside') {
-
-      $scope.modal.show();
-      
-      // START SCANNING AND SET THE ZONE FOR THIS USER
-      Zones.scan($rootScope.userRef);
-
-      // Check the user into the space
-      $rootScope.userRef.child('unlocked').set(true);
-      $rootScope.userRef.child('lastSeen').set(Date.now());
-
-      // Set the location count
-      $rootScope.userRef.child('locationCount').once('value', function(snap) {
-        var locationcount = snap.val();
-        ++locationcount;
-        $rootScope.userRef.child('locationCount').set(locationcount);
-        $scope.user.locationCount = locationcount;
-        $scope.$apply();
-      });
-
-      var now = new Date().getTime();
-      var _30SecondsFromNow = new Date(now + 30 * 1000);
-
-      $cordovaLocalNotification.schedule({
-        id: 11,
-        title: 'Welcome to mod!',
-        text: 'You are now checked in.'
-      }).then(function (result) {
-        // ...
-        console.log('boom 3');
-      });
-
-    } else if (regionState.state === 'outside') {
-
-      // stop scanning for interior zones
-      Zones.stopScan();
-
-      // Update the user data in firebase
-      $rootScope.userRef.child('unlocked').set(false);
-      $rootScope.userRef.child('lastSeen').set(Date.now());
-      $rootScope.userRef.child('zone').set(0);
-
-      var now = new Date().getTime();
-      var _30SecondsFromNow = new Date(now + 30 * 1000);
-
-      $cordovaLocalNotification.schedule({
-        id: 22,
-        title: 'You left mod!',
-        text: 'We checked you out.'
-      }).then(function (result) {
-        // ...
-        console.log('boom 4');
-      });
-
+    if ($rootScope.currUser) {
+      var feedRef = new Firebase($rootScope.firebaseUrl + 'feed/');
+      feedRef.push({ 'checkedIn': true, 'name': $rootScope.currUser.displayName, 'timeStamp' : Date.now(), 'image' : $rootScope.currUser.image });
     };
 
-  },
-  function(error){
-    console.log('error', error);
+    /// USER WAS HERE FOR X amount OF TIME
+
+    // Check the user into the space
+    $rootScope.userRef.child('unlocked').set(true);
+    $rootScope.userRef.child('lastSeen').set(Date.now());
+
+    // Set the location count
+    $rootScope.userRef.child('locationCount').once('value', function(snap) {
+      var locationcount = snap.val();
+      ++locationcount;
+      $rootScope.userRef.child('locationCount').set(locationcount);
+      $rootScope.currUser.locationCount = locationcount;
+      $rootScope.$apply();
+      $rootScope.modal.show();
+    });
+
+    $cordovaLocalNotification.schedule({
+      id: 11,
+      title: 'Welcome to mod!',
+      text: 'You are now checked in.'
+    }).then(function (result) {
+      // ...
+      console.log('boom 3');
+    });
+
+  }, function($scope){
+    // outside callback
+    console.log('Monitor callback OUTSIDE');
+    // stop scanning for interior zones
+    Zones.stopScan();
+
+    var timeDifference = Date.now() - $rootScope.currUser.lastSeen;
+    var feedRef = new Firebase($rootScope.firebaseUrl + 'feed/');
+    feedRef.push({ 
+      'checkedIn': true, 
+      'name': $rootScope.currUser.displayName, 
+      'timeStamp' : Date.now(), 
+      'image' : $rootScope.currUser.image,
+      'timeSpent' : timeDifference
+    });
+    
+
+    // Update the user data in firebase
+    $rootScope.userRef.child('unlocked').set(false);
+    $rootScope.userRef.child('lastSeen').set(Date.now());
+    $rootScope.userRef.child('zone').set(0);
+    // fredNameRef.set({ first: 'Fred', last: 'Flintstone' });
+    $rootScope.$apply();
+
+    $cordovaLocalNotification.schedule({
+      id: 22,
+      title: 'You left mod!',
+      text: 'We checked you out.'
+    }).then(function (result) {
+      // ...
+      console.log('boom 4');
+    });
+
   });
 
-  $scope.users = Users.all();
+  // estimote.beacons.startMonitoringForRegion(
+  // {
+  //   'identifier': 'MyRegion',
+  //   'uuid': 'B9407F30-F5F8-466E-AFF9-25556B57FE6D'
+  // },
+  // function(regionState){
+
+  //   if (regionState.state === 'inside') {
+
+  //     $scope.modal.show();
+      
+  //     // START SCANNING AND SET THE ZONE FOR THIS USER
+  //     Zones.scan($rootScope.userRef);
+
+  //     // Check the user into the space
+  //     $rootScope.userRef.child('unlocked').set(true);
+  //     $rootScope.userRef.child('lastSeen').set(Date.now());
+
+  //     // Set the location count
+  //     $rootScope.userRef.child('locationCount').once('value', function(snap) {
+  //       var locationcount = snap.val();
+  //       ++locationcount;
+  //       $rootScope.userRef.child('locationCount').set(locationcount);
+  //       $scope.user.locationCount = locationcount;
+  //       $scope.$apply();
+  //     });
+
+  //     var now = new Date().getTime();
+  //     var _30SecondsFromNow = new Date(now + 30 * 1000);
+
+  //     $cordovaLocalNotification.schedule({
+  //       id: 11,
+  //       title: 'Welcome to mod!',
+  //       text: 'You are now checked in.'
+  //     }).then(function (result) {
+  //       // ...
+  //       console.log('boom 3');
+  //     });
+
+  //   } else if (regionState.state === 'outside') {
+
+  //     // stop scanning for interior zones
+  //     Zones.stopScan();
+
+  //     // Update the user data in firebase
+  //     $rootScope.userRef.child('unlocked').set(false);
+  //     $rootScope.userRef.child('lastSeen').set(Date.now());
+  //     $rootScope.userRef.child('zone').set(0);
+
+  //     var now = new Date().getTime();
+  //     var _30SecondsFromNow = new Date(now + 30 * 1000);
+
+  //     $cordovaLocalNotification.schedule({
+  //       id: 22,
+  //       title: 'You left mod!',
+  //       text: 'We checked you out.'
+  //     }).then(function (result) {
+  //       // ...
+  //       console.log('boom 4');
+  //     });
+
+  //   };
+
+  // },
+  // function(error){
+  //   console.log('error', error);
+  // });
 
 })
 
@@ -243,6 +294,10 @@ angular.module('thunderdome.controllers', [])
       $scope.zones = MapZones.getZones(users);
     });
   });
+})
+
+.controller('FeedCtrl', function ($scope, $state, Feed) {
+  $scope.feed = Feed.all();
 })
 
 .controller('UserDetailCtrl', function ($scope, $stateParams, Users) {

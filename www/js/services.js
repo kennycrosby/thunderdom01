@@ -15,60 +15,25 @@ angular.module('thunderdome.services', ['firebase'])
       'uuid': 'B9407F30-F5F8-466E-AFF9-25556B57FE6D'
     },
 
-    monitor : function() {
+    monitor : function(inside_cb, outside_cb) {
 
-      console.log('got here');
-
-      ////////////////////////////////////////////
-      // // MONITORING TEST
+      // // MONITORING
       estimote.beacons.startMonitoringForRegion(
         this.regionObj,
-        this.onMonitor,
+        function(regionState) {
+          if (regionState.state === 'inside') {
+            console.log('insideRegion if statement');
+            //inside
+            inside_cb();
+          } else if (regionState.state === 'outside') {
+            console.log('outsideRegion if statement');
+            //outside
+            outside_cb();
+          };
+        },
         function(error){
           console.log('error', error);
         });
-      ////////////////////////////////////////////
-
-    },
-    onMonitor : function(regionState){
-      console.log('regionState', regionState);
-
-      console.log('You are ' + regionState.state + ' the region');
-      alert('You are ' + regionState.state + ' the region');
-
-      if (regionState.state === 'inside') {
-        console.log('inside inside if');
-        $rootScope.userRef.child('unlocked').set(true);
-        $rootScope.userRef.child('lastSeen').set(Date.now());
-
-        var now = new Date().getTime();
-        var _30SecondsFromNow = new Date(now + 30 * 1000);
-
-        $cordovaLocalNotification.schedule({
-          id: 1,
-          title: 'Welcome to mod!',
-          text: 'You are inside mod',
-          at: _30SecondsFromNow
-        }).then(function (result) {
-          // ...
-          alert('boom 3');
-        });
-
-      } else if (regionState.state === 'outside') {
-        console.log('Inside OUTSIDE if');
-        $rootScope.userRef.child('unlocked').set(false);
-
-      };
-
-      //alert('regionState', regionState)
-      if (window.mAppInBackground){
-        console.log('app is running in background');
-        window.plugin.notification.local.add({
-            message: 'Region state: ' + regionState.state,
-            sound: null 
-        });
-      }
-
     }
   }
 }])
@@ -143,6 +108,18 @@ angular.module('thunderdome.services', ['firebase'])
 
     stopScan : function() {
       estimote.beacons.stopRangingBeaconsInRegion(this.regionObj);
+    }
+  }
+})
+
+.factory('Feed', function ($firebase) {
+  // Might use a resource here that returns a JSON array
+  var ref = new Firebase(firebaseUrl);
+  var feed = $firebase(ref.child('feed')).$asArray();
+
+  return {
+    all: function () {
+      return feed;
     }
   }
 })
